@@ -1,28 +1,12 @@
 import socket
 from threading import Thread
-import logging
+
+from server_tic_tac_toe.core.logger_builder import create_logger
+from server_tic_tac_toe.core.thread_handler import handle_connection
 
 HOST = 'localhost'
 PORT = 5332
-logger = logging.getLogger("SERVER")
-logging.basicConfig(level=logging.INFO)
-
-def encode_data(data):
-  return bytes(data, encoding='utf8')
-
-
-def handle_connection(connection, client):
-  logger.info("new thread running...")
-  try:
-    while True:
-      message = connection.recv(1024).decode('utf8')
-      if not message:
-        break
-      logger.info(message)
-      connection.send(encode_data('sup'))
-    connection.close()
-  except Exception:
-    connection.close()
+logger = create_logger(name="SERVER", color="CYAN")
 
 
 try:
@@ -31,7 +15,7 @@ try:
 
   tcp.bind((HOST, PORT))
   tcp.listen(1)
-  logger.info("Listening...")
+  logger.info('Listening...')
 
   while True:
     connection, client = tcp.accept()

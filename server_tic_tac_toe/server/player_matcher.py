@@ -1,6 +1,8 @@
 from threading import Thread
 
 from server_tic_tac_toe.utils.logger_builder import create_logger
+from server_tic_tac_toe.server.game_handler import GameHandler
+
 
 class PlayerMatcher(Thread):
     def __init__(self, daemon=True):
@@ -26,5 +28,4 @@ class PlayerMatcher(Thread):
                         paired_players.append(player)
                         if len(paired_players) == 2:
                             self.logger.info('Players matched!')
-                            paired_players[0].set_playing()
-                            paired_players[1].set_playing()
+                            GameHandler(paired_players[0], paired_players[1])

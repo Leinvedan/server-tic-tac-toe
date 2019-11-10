@@ -28,4 +28,10 @@ class PlayerMatcher(Thread):
                         paired_players.append(player)
                         if len(paired_players) == 2:
                             self.logger.info('Players matched!')
-                            GameHandler(paired_players[0], paired_players[1])
+                            paired_players[0].set_playing()
+                            paired_players[1].set_playing()
+                            game = GameHandler(
+                                paired_players[0],
+                                paired_players[1]
+                            )
+                            game.start()

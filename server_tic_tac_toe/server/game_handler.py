@@ -11,7 +11,5 @@ class GameHandler(Thread):
 
     def run(self):
         self.logger.info(
-            f'Game starting:{self.player_1.name} VS {self.player_2.name}'
+            f'Game starting: {self.player_1.name} VS {self.player_2.name}'
         )
-        self.player_1.set_playing()
-        self.player_2.set_playing()

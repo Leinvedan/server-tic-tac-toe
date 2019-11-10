@@ -1,5 +1,4 @@
 import socket
-from threading import Thread
 
 from server_tic_tac_toe.utils.logger_builder import create_logger
 from server_tic_tac_toe.server.protocols import open_tcp_server_socket
@@ -30,7 +29,7 @@ while True:
         player_connection.start()
         player_matcher.add_new_player(player_connection)
 
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         tcp.shutdown(socket.SHUT_RDWR)
         tcp.close()
         logger.info('Closing server...')

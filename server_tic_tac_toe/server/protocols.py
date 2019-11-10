@@ -1,6 +1,7 @@
 import socket
 
-from server_tic_tac_toe.config import HOST,PORT
+from server_tic_tac_toe.config import HOST, PORT
+
 
 def open_tcp_server_socket():
     tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

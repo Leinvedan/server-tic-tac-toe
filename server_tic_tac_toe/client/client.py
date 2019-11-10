@@ -1,8 +1,9 @@
 import socket
 
-from server_tic_tac_toe.config import HOST,PORT
+from server_tic_tac_toe.config import HOST, PORT
 
 # testing client
+
 
 def read_input_as_bytes():
     return bytes(input(">"), encoding='utf8')

@@ -2,8 +2,8 @@ import socket
 from threading import Thread
 
 from server_tic_tac_toe.utils.logger_builder import create_logger
-from server_tic_tac_toe.server.thread_handler import handle_connection
 from server_tic_tac_toe.server.protocols import open_tcp_server_socket
+from server_tic_tac_toe.server.connection_handler import ConnectionHandler
 
 
 logger = create_logger(name="SERVER", color="CYAN")
@@ -18,11 +18,12 @@ while True:
         connection, client = tcp.accept()
         logger.info(f'connected to: {str(client)}')
         player_counter += 1
-        connection_handler = Thread(
-            target=handle_connection,
-            args=(connection, client, player_counter),
-            daemon=True
-        )
+
+        connection_handler = ConnectionHandler(
+            connection=connection,
+            client=client,
+            name=player_counter
+        ) 
         connection_handler.start()
 
     except KeyboardInterrupt as e:

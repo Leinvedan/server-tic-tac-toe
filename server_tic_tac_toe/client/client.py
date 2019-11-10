@@ -1,14 +1,13 @@
 import socket
 
-# testing client
+from server_tic_tac_toe.config import HOST,PORT
 
+# testing client
 
 def read_input_as_bytes():
     return bytes(input(">"), encoding='utf8')
 
 
-HOST = 'localhost'
-PORT = 5332
 try:
     tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     dest = (HOST, PORT)

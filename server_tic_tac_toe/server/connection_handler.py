@@ -45,8 +45,12 @@ class ConnectionHandler(Thread):
     def set_playing(self):
         self.is_waiting_match = False
 
-    def get_command(self):
-        return self.command
+    def pop_command(self):
+        command, self.command = self.command, None
+        return command
+
+    def command_available(self):
+        return bool(self.command)
 
     def close_connection(self):
         self.connected = False
@@ -54,12 +58,7 @@ class ConnectionHandler(Thread):
 
     def get_user_name(self):
         name = self.connection.recv(1024).decode('utf8')
-        self.connection.sendall(
-            bytes(
-                f'Welcome {name}!\nWaiting for player 2',
-                encoding='utf8'
-                )
-            )
+        self.send_response(f'Welcome {name}!\nWaiting for player 2')
         return name
 
     def parse_response(self, message):
@@ -79,5 +78,5 @@ class ConnectionHandler(Thread):
                 'Invalid format!\nexpected JSON with line and column fields'
             )
 
-    def send_response(self, message, clear_command=False):
-        self.connection.send(self._encode_data(message))
+    def send_response(self, message):
+        self.connection.sendall(self._encode_data(message))

@@ -55,39 +55,28 @@ class GameHandler(Thread):
         else:
             ERROR_MESSAGE = {
                 'status': 'error',
-                'board': [],
                 'message': (
                     'Your opponent has left the game,'
                     'returning to waiting room'
                 )
             }
 
-            if not self.player_1.connected:
-                self.logger.info(f'{self.player_1.name} has left the game...')
-            if not self.player_2.connected:
-                self.logger.info(f'{self.player_2.name} has left the game...')
-
-            self.player_1.send_response(ERROR_MESSAGE)
-            self.player_1.set_waiting_match(True)
-
-            self.player_2.send_response(ERROR_MESSAGE)
-            self.player_2.set_waiting_match(True)
+            for player in [self.player_1, self.player_2]:
+                if not player.connected:
+                    self.logger.info(f'{player.name} has left the game...')
+                player.set_waiting_match(True)
+                player.send_response(ERROR_MESSAGE)
 
         return False
 
     def broadcast_board(self, board, isPlayer1Turn):
-        message_player1 = {
-            'status': 'play' if isPlayer1Turn else 'wait',
-            'board': board
-        }
-        message_player2 = {
-            'status': 'play' if not isPlayer1Turn else 'wait',
+        message = {
+            'status': None,
             'board': board
         }
 
-        self.player_1.send_response(
-            message_player1
-        )
-        self.player_2.send_response(
-            message_player2
-        )
+        message['status'] = 'play' if isPlayer1Turn else 'wait'
+        self.player_1.send_response(message)
+
+        message['status'] = 'play' if not isPlayer1Turn else 'wait'
+        self.player_2.send_response(message)

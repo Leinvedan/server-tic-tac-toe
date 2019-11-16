@@ -1,5 +1,4 @@
 from threading import Thread
-import json
 from server_tic_tac_toe.utils.logger_builder import create_logger
 
 
@@ -19,14 +18,12 @@ class GameHandler(Thread):
                  ['-', '-', '-'],
                  ['-', '-', '-']]
         isPlayer1Turn = True
+        self.player_1.send_response({'status': 'matched'})
+        self.player_2.send_response({'status': 'matched'})
         self.broadcast_board(board, isPlayer1Turn)
 
-        while(True):
+        while(self.both_players_connected()):
             try:
-                if not self.both_players_connected():
-                    self.logger.info('A player has left the game...')
-                    # Return remaining player to the waiting list
-                    break
                 if isPlayer1Turn and self.player_1.command_available():
                     board = self.update_board(self.player_1, board, 'X')
                     isPlayer1Turn = False
@@ -39,6 +36,10 @@ class GameHandler(Thread):
 
             except Exception as e:
                 self.logger.info(e)
+        self.logger.info((
+            f'{self.player_1.name} VS {self.player_2.name} game has ended'
+            '... Closing session'
+        ))
 
     def update_board(self, connection, board, symbol):
         board = board.copy()
@@ -49,17 +50,41 @@ class GameHandler(Thread):
         return board
 
     def both_players_connected(self):
-        return self.player_1.connected and self.player_2.connected
+        if self.player_1.connected and self.player_2.connected:
+            return True
+        else:
+            ERROR_MESSAGE = {
+                'status': 'error',
+                'board': [],
+                'message': (
+                    'Your opponent has left the game,'
+                    'returning to waiting room'
+                )
+            }
+
+            if not self.player_1.connected:
+                self.logger.info(f'{self.player_1.name} has left the game...')
+            if not self.player_2.connected:
+                self.logger.info(f'{self.player_2.name} has left the game...')
+
+            self.player_1.send_response(ERROR_MESSAGE)
+            self.player_1.set_waiting_match(True)
+
+            self.player_2.send_response(ERROR_MESSAGE)
+            self.player_2.set_waiting_match(True)
+
+        return False
 
     def broadcast_board(self, board, isPlayer1Turn):
-        message_player1 = json.dumps({
+        message_player1 = {
             'status': 'play' if isPlayer1Turn else 'wait',
             'board': board
-        })
-        message_player2 = json.dumps({
+        }
+        message_player2 = {
             'status': 'play' if not isPlayer1Turn else 'wait',
             'board': board
-        })
+        }
+
         self.player_1.send_response(
             message_player1
         )

@@ -18,6 +18,12 @@ def read_input():
     return bytes(command, encoding='utf8')
 
 
+def pretty_print_board(response):
+    if 'board' in response:
+        for line in response['board']:
+            print(line)
+
+
 try:
     tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     dest = (HOST, PORT)
@@ -28,21 +34,28 @@ try:
     #  name confirmation
     message_to_send = read_input()
     tcp.sendall(message_to_send)
-    response = tcp.recv(1024)
-    print("server:", response.decode('utf8'))
 
     while message_to_send != "quit":
         response = tcp.recv(1024)
         response = response.decode('utf8')
         response = json.loads(response)
-        print("server:", response)
-        print(response['status'])
-        for line in response['board']:
-            print(line)
-        if (response['status'] == 'play'):
+        pretty_print_board(response)
+
+        if response['status'] == 'matched':
+            print('Server: Matched with other player!')
+
+        elif response['status'] == 'play':
             # send play
             message_to_send = read_coordinates_input()
             tcp.sendall(message_to_send)
+
+        elif response['status'] == 'error':
+            print('Error received:', response['message'])
+            print('Waiting new game')
+
+        elif response['status'] == 'waiting':
+            print("server:", response['message'])
+
 
 except KeyboardInterrupt:
     print("Exiting...")

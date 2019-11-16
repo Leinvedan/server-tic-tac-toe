@@ -33,8 +33,12 @@ try:
 
     while message_to_send != "quit":
         response = tcp.recv(1024)
-        print("server:", response.decode('utf8'))
+        response = response.decode('utf8')
         response = json.loads(response)
+        print("server:", response)
+        print(response['status'])
+        for line in response['board']:
+            print(line)
         if (response['status'] == 'play'):
             # send play
             message_to_send = read_coordinates_input()

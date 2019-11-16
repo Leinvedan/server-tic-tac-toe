@@ -10,7 +10,6 @@ logger = create_logger(name="SERVER", color="CYAN")
 
 tcp = open_tcp_server_socket()
 logger.info('Listening...')
-player_counter = 0
 
 player_matcher = PlayerMatcher()
 player_matcher.start()
@@ -19,7 +18,6 @@ while True:
     try:
         connection, client = tcp.accept()
         logger.info(f'connected to: {str(client)}')
-        player_counter += 1
 
         player_connection = ConnectionHandler(
             connection=connection,

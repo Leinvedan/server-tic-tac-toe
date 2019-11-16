@@ -23,8 +23,7 @@ while True:
 
         player_connection = ConnectionHandler(
             connection=connection,
-            client=client,
-            name=player_counter
+            client=client
         )
         player_connection.start()
         player_matcher.add_new_player(player_connection)

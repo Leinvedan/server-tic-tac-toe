@@ -2,32 +2,17 @@ import socket
 import json
 
 from server_tic_tac_toe.config import HOST, PORT
+from server_tic_tac_toe.parsing import (
+    read_coordinates_input,
+    read_input,
+    pretty_print_board
+)
 
 # testing client
 
-
-def read_coordinates_input():
-    command = input(">").split(' ')
-    command = {'line': command[0], 'column': command[1]}
-    command = json.dumps(command)
-    return bytes(command, encoding='utf8')
-
-
-def read_input():
-    command = input(">")
-    return bytes(command, encoding='utf8')
-
-
-def pretty_print_board(response):
-    if 'board' in response:
-        for line in response['board']:
-            print(line)
-
-
 try:
     tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    dest = (HOST, PORT)
-    tcp.connect(dest)
+    tcp.connect((HOST, PORT))
 
     print("Write message:")
 

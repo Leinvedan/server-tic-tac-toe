@@ -2,7 +2,29 @@
 
 ## Description
 
-A server for playing tic tac toe using sockets and JSON
+A server for playing tic tac toe, made using sockets and JSON
+
+## Running project
+
+To run this project, you need:
+
+    - pyenv with python 3.8 installed
+
+    - pipenv
+
+and install the dependencies:
+
+    $ make setup
+  
+After that you can:
+
+* start the server:
+
+      $ make run
+
+* start testing client:
+
+      $ make run_client
 
 ## Message format
 

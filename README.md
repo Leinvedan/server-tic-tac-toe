@@ -12,10 +12,10 @@ The server responses are in JSON, containing the following fields:
 
 ```json
   {
-    'status': 'status of the player',
-    'error_type': 'type of the error',
-    'message': 'error context',
-    'board': 'array representing the board'
+    "status": "status of the player",
+    "error_type": "type of the error",
+    "message": "error context",
+    "board": "array representing the board"
   }
 ```
 
@@ -49,7 +49,7 @@ The first message should be the player's name, in the following format:
 
 ```json
   {
-    'my_name':'player name'
+    "my_name":"player name"
   }
 ```
 
@@ -61,8 +61,8 @@ after being matched with another player, the game will start. The game messages 
 
 ```json
   {
-    'line': 'integer value between 1 and 3',
-    'column': 'integer value between 1 and 3'
+    "line": "integer value between 1 and 3",
+    "column": "integer value between 1 and 3"
   }
 ```
 

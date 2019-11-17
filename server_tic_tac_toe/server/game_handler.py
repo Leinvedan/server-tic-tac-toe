@@ -5,7 +5,8 @@ from server_tic_tac_toe.utils.logger_builder import create_logger
 class GameHandler(Thread):
     def __init__(self, connection_1, connection_2, daemon=True):
         Thread.__init__(self, daemon=daemon)
-        self.logger = create_logger(name=f'GAME', color='BLUE')
+        session_id = id(self)
+        self.logger = create_logger(name=f'GAME-{session_id}', color='BLUE')
         self.player_1 = connection_1
         self.player_2 = connection_2
 

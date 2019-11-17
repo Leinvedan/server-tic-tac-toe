@@ -23,16 +23,13 @@ class ConnectionHandler(Thread):
         self.name = self.get_user_name()
         self.logger = create_logger(name=f'{self.name}', color='YELLOW')
         self.is_waiting_match = True
-
         self.logger.info('new thread running...')
+
         try:
-            while True:
+            while self.connected:
                 message = self.connection.recv(1024).decode('utf8')
                 if not self.is_waiting_match:
-                    self.command = self.parse_response(message)
-
-                if not self.connected:
-                    break
+                    self.command = self.parse_command(message)
 
         except Exception:
             self.close_connection()
@@ -55,29 +52,40 @@ class ConnectionHandler(Thread):
         self.connection.close()
 
     def get_user_name(self):
-        name = self.connection.recv(1024).decode('utf8')
-        self.send_response({
-            'status': 'waiting',
-            'message': f'Welcome {name}!\nWaiting for player 2'
-        })
-        return name
+        name = None
+        try:
+            response = self.connection.recv(1024).decode('utf8')
+            response = json.loads(response)
+            if 'my_name' in response:
+                name = response['my_name']
+                self.send_response({'status': 'waiting'})
+        except Exception:
+            self.close_connection()
+        finally:
+            return name
 
-    def parse_response(self, message):
+    def parse_command(self, message):
+        command = None
         try:
             jsonObj = json.loads(message)
             if 'line' in jsonObj and 'column' in jsonObj:
-                return Command(
+                command = Command(
                     line=int(jsonObj['line']),
                     column=int(jsonObj['column'])
                 )
-            return None
+
         except Exception:
             self.send_response({
                 'status': 'error',
+                'error_type': 'INVALID_FORMAT',
                 'message': ('Invalid format!'
-                            'expected JSON with line and column fields'
+                            'expected JSON with INTEGER line'
+                            'and column fields'
                             )
             })
+
+        finally:
+            return command
 
     def send_response(self, message):
         try:

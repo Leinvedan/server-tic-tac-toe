@@ -38,15 +38,13 @@ class GameHandler(Thread):
                 self.logger.info(e)
         self.logger.info((
             f'{self.player_1.name} VS {self.player_2.name} game has ended'
-            '... Closing session'
         ))
+        self.logger.info('Closing session')
 
     def update_board(self, connection, board, symbol):
         board = board.copy()
         command = connection.pop_command()
         board[command.line - 1][command.column - 1] = symbol
-        for line in board:
-            self.logger.info(line)
         return board
 
     def both_players_connected(self):
@@ -55,6 +53,7 @@ class GameHandler(Thread):
         else:
             ERROR_MESSAGE = {
                 'status': 'error',
+                'error_type': 'OPPONENT_LEFT',
                 'message': (
                     'Your opponent has left the game,'
                     'returning to waiting room'
@@ -75,8 +74,8 @@ class GameHandler(Thread):
             'board': board
         }
 
-        message['status'] = 'play' if isPlayer1Turn else 'wait'
+        message['status'] = 'play' if isPlayer1Turn else 'opponent'
         self.player_1.send_response(message)
 
-        message['status'] = 'play' if not isPlayer1Turn else 'wait'
+        message['status'] = 'play' if not isPlayer1Turn else 'opponent'
         self.player_2.send_response(message)

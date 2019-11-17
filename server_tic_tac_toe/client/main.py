@@ -41,6 +41,10 @@ try:
             print('[SERVER]:', response['message'])
 
             if response['error_type'] == 'INVALID_FORMAT':
+                print('invalid format check the client`s code')
+                exit()
+
+            if response['error_type'] == 'INVALID_VALUES':
                 print('invalid input, try again')
                 message_to_send = read_coordinates_input()
                 tcp.sendall(message_to_send)

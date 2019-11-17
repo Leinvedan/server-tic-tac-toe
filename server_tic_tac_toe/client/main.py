@@ -2,9 +2,9 @@ import socket
 import json
 
 from server_tic_tac_toe.config import HOST, PORT
-from server_tic_tac_toe.parsing import (
+from server_tic_tac_toe.client.parsing import (
     read_coordinates_input,
-    read_input,
+    read_name_input,
     pretty_print_board
 )
 
@@ -14,10 +14,10 @@ try:
     tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tcp.connect((HOST, PORT))
 
-    print("Write message:")
+    print("Write your name:")
 
     #  name confirmation
-    message_to_send = read_input()
+    message_to_send = read_name_input()
     tcp.sendall(message_to_send)
 
     while message_to_send != "quit":
@@ -27,20 +27,26 @@ try:
         pretty_print_board(response)
 
         if response['status'] == 'matched':
-            print('Server: Matched with other player!')
+            print('Matched with other player!')
 
         elif response['status'] == 'play':
             # send play
             message_to_send = read_coordinates_input()
             tcp.sendall(message_to_send)
 
-        elif response['status'] == 'error':
-            print('Error received:', response['message'])
-            print('Waiting new game')
-
         elif response['status'] == 'waiting':
-            print("server:", response['message'])
+            print("Waiting match")
 
+        elif response['status'] == 'error':
+            print('[SERVER]:', response['message'])
+
+            if response['error_type'] == 'INVALID_FORMAT':
+                print('invalid input, try again')
+                message_to_send = read_coordinates_input()
+                tcp.sendall(message_to_send)
+
+            elif response['error_type'] == 'OPPONENT_LEFT':
+                print('Waiting new game')
 
 except KeyboardInterrupt:
     print("Exiting...")

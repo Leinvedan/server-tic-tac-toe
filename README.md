@@ -42,6 +42,7 @@ The server responses are in JSON, containing the following fields:
 |----------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
 | OPPONENT_LEFT  | Your opponent has left the game, you will be moved back to the matcher. The client should wait for the message with status "matched" again.        |
 | INVALID_FORMAT | The client is not sending the correct format (JSON). See [client message format](#client-message-format). The server will wait for another message |
+| INVALID_VALUES | The values are either out of bounds (1 <= value <= 3) or targetting a position already chosen on the board |
 
 ### Client message format
 

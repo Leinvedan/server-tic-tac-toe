@@ -1,5 +1,8 @@
 from threading import Thread
 from server_tic_tac_toe.utils.logger_builder import create_logger
+from server_tic_tac_toe.server.board_utils import (
+    update_board
+)
 
 
 class GameHandler(Thread):
@@ -18,6 +21,7 @@ class GameHandler(Thread):
         board = [['-', '-', '-'],
                  ['-', '-', '-'],
                  ['-', '-', '-']]
+
         isPlayer1Turn = True
         self.player_1.send_response({'status': 'matched'})
         self.player_2.send_response({'status': 'matched'})
@@ -26,27 +30,22 @@ class GameHandler(Thread):
         while(self.both_players_connected()):
             try:
                 if isPlayer1Turn and self.player_1.command_available():
-                    board = self.update_board(self.player_1, board, 'X')
+                    board = update_board(self.player_1, board, 'X')
                     isPlayer1Turn = False
                     self.broadcast_board(board, isPlayer1Turn)
 
                 elif not isPlayer1Turn and self.player_2.command_available():
-                    board = self.update_board(self.player_2, board, 'O')
+                    board = update_board(self.player_2, board, 'O')
                     isPlayer1Turn = True
                     self.broadcast_board(board, isPlayer1Turn)
 
             except Exception as e:
                 self.logger.info(e)
+
         self.logger.info((
             f'{self.player_1.name} VS {self.player_2.name} game has ended'
         ))
         self.logger.info('Closing session')
-
-    def update_board(self, connection, board, symbol):
-        board = board.copy()
-        command = connection.pop_command()
-        board[command.line - 1][command.column - 1] = symbol
-        return board
 
     def both_players_connected(self):
         if self.player_1.connected and self.player_2.connected:

@@ -3,7 +3,6 @@ from threading import Thread
 from collections import namedtuple
 
 from server_tic_tac_toe.utils.logger_builder import create_logger
-from server_tic_tac_toe.server.board_utils import command_is_inside_bounds
 
 Command = namedtuple('command', 'line column')
 
@@ -74,23 +73,33 @@ class ConnectionHandler(Thread):
                     line=int(jsonObj['line']),
                     column=int(jsonObj['column'])
                 )
-                if not command_is_inside_bounds(command):
-                    raise Exception()
 
         except Exception:
             command = None
-            self.send_response({
-                'status': 'error',
-                'error_type': 'INVALID_FORMAT',
-                'message': ('Invalid format!'
-                            'expected JSON with INTEGER values'
-                            ',line and column,'
-                            'between 1 and 3'
-                            )
-            })
+            self.send_invalid_format_error()
 
         finally:
             return command
+
+    def send_invalid_format_error(self):
+        self.send_response({
+            'status': 'error',
+            'error_type': 'INVALID_FORMAT',
+            'message': ('Invalid format!'
+                        'expected line and column fields '
+                        'with INTEGER values'
+                        )
+        })
+
+    def send_invalid_values_error(self):
+        self.send_response({
+            'status': 'error',
+            'error_type': 'INVALID_VALUES',
+            'message': ('Invalid values!'
+                        'The taget position must be empty,'
+                        ' and the values between 1 and 3.'
+                        )
+        })
 
     def send_response(self, message):
         try:

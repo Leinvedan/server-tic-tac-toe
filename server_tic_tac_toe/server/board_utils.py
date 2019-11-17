@@ -1,12 +1,16 @@
-def update_board(connection, board, symbol):
+def update_board(board, command, is_player_1_turn):
+    symbol = 'X' if is_player_1_turn else 'O'
     board = board.copy()
-    command = connection.pop_command()
     board[command.line - 1][command.column - 1] = symbol
     return board
 
 
 def command_is_valid(board, command):
-    return board[command.line][command.column] == '-'
+    is_inside_bounds = command_is_inside_bounds(command)
+    target_is_empty = False
+    if is_inside_bounds:
+        target_is_empty = board[command.line - 1][command.column - 1] == '-'
+    return target_is_empty and is_inside_bounds
 
 
 def command_is_inside_bounds(command):

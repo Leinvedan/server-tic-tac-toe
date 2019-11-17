@@ -1,7 +1,8 @@
 from threading import Thread
 from server_tic_tac_toe.utils.logger_builder import create_logger
 from server_tic_tac_toe.server.board_utils import (
-    update_board
+    update_board,
+    command_is_valid
 )
 
 
@@ -22,30 +23,32 @@ class GameHandler(Thread):
                  ['-', '-', '-'],
                  ['-', '-', '-']]
 
-        isPlayer1Turn = True
+        is_player_1_turn = True
         self.player_1.send_response({'status': 'matched'})
         self.player_2.send_response({'status': 'matched'})
-        self.broadcast_board(board, isPlayer1Turn)
+        self.broadcast_board(board, is_player_1_turn)
+
+        current_player = None
 
         while(self.both_players_connected()):
-            try:
-                if isPlayer1Turn and self.player_1.command_available():
-                    board = update_board(self.player_1, board, 'X')
-                    isPlayer1Turn = False
-                    self.broadcast_board(board, isPlayer1Turn)
+            current_player = (
+                self.player_1 if is_player_1_turn
+                else self.player_2
+            )
+            if current_player.command_available():
+                command = current_player.pop_command()
+                if command_is_valid(board, command):
+                    board = update_board(
+                        board,
+                        command,
+                        is_player_1_turn
+                    )
+                    is_player_1_turn = not is_player_1_turn
+                    self.broadcast_board(board, is_player_1_turn)
 
-                elif not isPlayer1Turn and self.player_2.command_available():
-                    board = update_board(self.player_2, board, 'O')
-                    isPlayer1Turn = True
-                    self.broadcast_board(board, isPlayer1Turn)
-
-            except Exception as e:
-                self.logger.info(e)
-
-        self.logger.info((
-            f'{self.player_1.name} VS {self.player_2.name} game has ended'
-        ))
-        self.logger.info('Closing session')
+                else:
+                    current_player.send_invalid_values_error()
+        self.end_game_logs()
 
     def both_players_connected(self):
         if self.player_1.connected and self.player_2.connected:
@@ -68,14 +71,20 @@ class GameHandler(Thread):
 
         return False
 
-    def broadcast_board(self, board, isPlayer1Turn):
+    def broadcast_board(self, board, is_player_1_turn):
         message = {
             'status': None,
             'board': board
         }
 
-        message['status'] = 'play' if isPlayer1Turn else 'opponent'
+        message['status'] = 'play' if is_player_1_turn else 'opponent'
         self.player_1.send_response(message)
 
-        message['status'] = 'play' if not isPlayer1Turn else 'opponent'
+        message['status'] = 'play' if not is_player_1_turn else 'opponent'
         self.player_2.send_response(message)
+
+    def end_game_logs(self):
+        self.logger.info((
+            f'{self.player_1.name} VS {self.player_2.name} game has ended'
+        ))
+        self.logger.info('Closing session')

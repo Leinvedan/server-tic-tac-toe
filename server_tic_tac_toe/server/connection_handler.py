@@ -15,12 +15,16 @@ class ConnectionHandler(Thread):
         self.connected = True
         self.is_waiting_match = False
         self.command = None
+        self._game_ended = False
 
     def _encode_data(self, data):
         return bytes(data, encoding='utf8')
 
     def run(self):
-        self.name = self.get_user_name()
+        self.name = self._get_response_from_field(
+            field_to_read='my_name',
+            status_to_send='waiting'
+        )
         self.logger = create_logger(name=f'{self.name}', color='YELLOW')
         self.is_waiting_match = True
         self.logger.info('new thread running...')
@@ -28,14 +32,18 @@ class ConnectionHandler(Thread):
         try:
             while self.connected:
                 message = self.connection.recv(1024).decode('utf8')
+
+                if self._game_ended:
+                    self._process_continue_playing(message)
+
                 if not self.is_waiting_match:
                     self.command = self.parse_command(message)
 
         except Exception:
-            self.close_connection()
             self.logger.info('Connection broken...')
         finally:
             self.logger.info('Closing connection')
+            self.close_connection()
 
     def set_waiting_match(self, is_waiting):
         self.is_waiting_match = is_waiting
@@ -51,18 +59,19 @@ class ConnectionHandler(Thread):
         self.connected = False
         self.connection.close()
 
-    def get_user_name(self):
-        name = None
+    def _get_response_from_field(self, field_to_read, status_to_send=None):
+        field_value = None
         try:
             response = self.connection.recv(1024).decode('utf8')
             response = json.loads(response)
-            if 'my_name' in response:
-                name = response['my_name']
-                self.send_response({'status': 'waiting'})
+            if field_to_read in response:
+                field_value = response[field_to_read]
+                if status_to_send:
+                    self.send_response({'status': status_to_send})
         except Exception:
             self.close_connection()
         finally:
-            return name
+            return field_value
 
     def parse_command(self, message):
         command = None
@@ -109,3 +118,21 @@ class ConnectionHandler(Thread):
         except Exception as e:
             self.logger.info(f'Message could not be sent:\n{e}')
             self.close_connection()
+
+    def game_ended(self):
+        self._game_ended = True
+
+    def _process_continue_playing(self, message):
+        try:
+            response = json.loads(message)
+            if 'continue' in response:
+                if response['continue'] != 'y':
+                    self.logger.info(f'{self.name} left')
+                    self.close_connection()
+                else:
+                    self.logger.info(f'{self.name} still playing')
+        except Exception:
+            self.logger.info('Continue couldn`t be processed, ignoring...')
+        finally:
+            self.set_waiting_match(True)
+            self._game_ended = False

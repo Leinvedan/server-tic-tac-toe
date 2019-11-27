@@ -42,6 +42,8 @@ class GameHandler(Thread):
                     )
 
                     if BoardValidator.player_won(board):
+                        self.player_1.game_ended()
+                        self.player_2.game_ended()
                         self.broadcast_board(
                             board,
                             is_player_1_turn,
@@ -87,8 +89,8 @@ class GameHandler(Thread):
         waiting = 'oponnent'
 
         if winner:
-            current = 'winner'
-            waiting = 'loser'
+            current = 'victory'
+            waiting = 'defeat'
 
         message['status'] = current if is_player_1_turn else waiting
         self.player_1.send_response(message)

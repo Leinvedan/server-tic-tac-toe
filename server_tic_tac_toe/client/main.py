@@ -4,11 +4,11 @@ import json
 from server_tic_tac_toe.config import HOST, PORT
 from server_tic_tac_toe.client.parsing import (
     read_coordinates_input,
-    read_name_input,
+    read_named_input,
     pretty_print_board
 )
 
-# testing client
+# testing client (JUST A TEMPLATE TO TEST THE SERVER)
 
 tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 tcp.connect((HOST, PORT))
@@ -16,10 +16,10 @@ tcp.connect((HOST, PORT))
 print("Write your name:")
 
 #  name confirmation
-message_to_send = read_name_input()
+message_to_send, _ = read_named_input('my_name')
 tcp.sendall(message_to_send)
 
-while message_to_send != "quit":
+while True:
 
     response = tcp.recv(1024)
     response = response.decode('utf8')
@@ -37,15 +37,13 @@ while message_to_send != "quit":
     elif response['status'] == 'waiting':
         print("Waiting match")
 
-    elif response['status'] == 'winner':
-        print('YOU WON!')
-        # ask if want to continue
-        break
-
-    elif response['status'] == 'loser':
-        print('you lost...')
-        # ask if want to continue
-        break
+    elif response['status'] == 'victory' or response['status'] == 'defeat':
+        print(f'[SERVER]:{response["status"]}')
+        print('Do you want to continue?')
+        message_to_send, value = read_named_input('continue')
+        tcp.sendall(message_to_send)
+        if value != 'y':
+            break
 
     elif response['status'] == 'error':
         print('[SERVER]:', response['message'])

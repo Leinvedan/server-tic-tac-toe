@@ -1,10 +1,6 @@
 from threading import Thread
 from server_tic_tac_toe.utils.logger_builder import create_logger
-from server_tic_tac_toe.server.board_utils import (
-    update_board,
-    command_is_valid,
-    player_won
-)
+from server_tic_tac_toe.server.board_validator import BoardValidator
 
 
 class GameHandler(Thread):
@@ -38,14 +34,14 @@ class GameHandler(Thread):
             )
             if current_player.command_available():
                 command = current_player.pop_command()
-                if command_is_valid(board, command):
-                    board = update_board(
+                if BoardValidator.command_is_valid(board, command):
+                    board = BoardValidator.update_board(
                         board,
                         command,
                         is_player_1_turn
                     )
 
-                    if player_won(board):
+                    if BoardValidator.player_won(board):
                         self.broadcast_board(
                             board,
                             is_player_1_turn,

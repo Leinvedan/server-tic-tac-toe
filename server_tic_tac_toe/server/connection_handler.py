@@ -31,8 +31,7 @@ class ConnectionHandler(Thread):
         try:
             while self.connected:
                 message = self.connection.recv(1024).decode('utf8')
-                if not self.is_waiting_match:
-                    self.command = self.parse_command(message)
+                self.command = self.parse_command(message)
 
         except Exception:
             self.close_connection()

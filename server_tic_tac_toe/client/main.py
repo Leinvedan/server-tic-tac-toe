@@ -20,6 +20,7 @@ message_to_send = read_name_input()
 tcp.sendall(message_to_send)
 
 while message_to_send != "quit":
+
     response = tcp.recv(1024)
     response = response.decode('utf8')
     response = json.loads(response)
@@ -35,6 +36,16 @@ while message_to_send != "quit":
 
     elif response['status'] == 'waiting':
         print("Waiting match")
+
+    elif response['status'] == 'winner':
+        print('YOU WON!')
+        # ask if want to continue
+        break
+
+    elif response['status'] == 'loser':
+        print('you lost...')
+        # ask if want to continue
+        break
 
     elif response['status'] == 'error':
         print('[SERVER]:', response['message'])

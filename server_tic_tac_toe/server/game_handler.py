@@ -2,7 +2,8 @@ from threading import Thread
 from server_tic_tac_toe.utils.logger_builder import create_logger
 from server_tic_tac_toe.server.board_utils import (
     update_board,
-    command_is_valid
+    command_is_valid,
+    player_won
 )
 
 
@@ -19,9 +20,9 @@ class GameHandler(Thread):
             f'Game starting: {self.player_1.name} '
             f'VS {self.player_2.name}'
         ))
-        board = [['-', '-', '-'],
-                 ['-', '-', '-'],
-                 ['-', '-', '-']]
+        board = [['', '', ''],
+                 ['', '', ''],
+                 ['', '', '']]
 
         is_player_1_turn = True
         self.player_1.send_response({'status': 'matched'})
@@ -43,6 +44,15 @@ class GameHandler(Thread):
                         command,
                         is_player_1_turn
                     )
+
+                    if player_won(board):
+                        self.broadcast_board(
+                            board,
+                            is_player_1_turn,
+                            winner=True
+                        )
+                        break
+
                     is_player_1_turn = not is_player_1_turn
                     self.broadcast_board(board, is_player_1_turn)
 
@@ -71,16 +81,22 @@ class GameHandler(Thread):
 
         return False
 
-    def broadcast_board(self, board, is_player_1_turn):
+    def broadcast_board(self, board, is_player_1_turn, winner=False):
         message = {
             'status': None,
             'board': board
         }
 
-        message['status'] = 'play' if is_player_1_turn else 'opponent'
-        self.player_1.send_response(message)
+        current = 'play'
+        waiting = 'oponnent'
 
-        message['status'] = 'play' if not is_player_1_turn else 'opponent'
+        if winner:
+            current = 'winner'
+            waiting = 'loser'
+
+        message['status'] = current if is_player_1_turn else waiting
+        self.player_1.send_response(message)
+        message['status'] = current if not is_player_1_turn else waiting
         self.player_2.send_response(message)
 
     def end_game_logs(self):

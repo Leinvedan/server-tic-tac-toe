@@ -47,6 +47,8 @@ The server responses are in JSON, containing the following fields:
 
 * The `board` field is only used when the status is either `opponent` or `play`
 
+* The `defeat` or `victory` will wait for an JSON with the `continue` field, which may contain `y` or `n`
+
 #### status types
 
 | status   |  description                                     |
@@ -56,6 +58,8 @@ The server responses are in JSON, containing the following fields:
 | matched  | Matched with another player. The game will begin |
 | play     | The server is waiting for your move              |
 | opponent | Wait your opponent's move                        |
+| victory  | You won!                                         |
+| defeat   | You lost...                                      |
 
 
 #### Error types
@@ -86,6 +90,22 @@ after being matched with another player, the game will start. The game messages 
   {
     "line": "integer value between 1 and 3",
     "column": "integer value between 1 and 3"
+  }
+```
+
+### After winning or losing
+
+The Client will receive an `status` with `defeat` or `victory`. The Client must send a JSON with the `continue` field, which may contain `y` or `n`. 
+
+* `y`: The server will keep the connection and try to start another game
+
+* `n`: The server will stop the connection
+
+#### Example:
+
+```json
+  {
+    "continue": "y",
   }
 ```
 

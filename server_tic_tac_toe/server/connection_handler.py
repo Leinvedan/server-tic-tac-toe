@@ -20,7 +20,10 @@ class ConnectionHandler(Thread):
         return bytes(data, encoding='utf8')
 
     def run(self):
-        self.name = self.get_user_name()
+        self.name = self._get_response_from_field(
+            field_to_read='my_name',
+            status_to_send='waiting'
+        )
         self.logger = create_logger(name=f'{self.name}', color='YELLOW')
         self.is_waiting_match = True
         self.logger.info('new thread running...')
@@ -51,18 +54,19 @@ class ConnectionHandler(Thread):
         self.connected = False
         self.connection.close()
 
-    def get_user_name(self):
-        name = None
+    def _get_response_from_field(self, field_to_read, status_to_send=None):
+        field_value = None
         try:
             response = self.connection.recv(1024).decode('utf8')
             response = json.loads(response)
-            if 'my_name' in response:
-                name = response['my_name']
-                self.send_response({'status': 'waiting'})
+            if field_to_read in response:
+                field_value = response[field_to_read]
+                if status_to_send:
+                    self.send_response({'status': status_to_send})
         except Exception:
             self.close_connection()
         finally:
-            return name
+            return field_value
 
     def parse_command(self, message):
         command = None

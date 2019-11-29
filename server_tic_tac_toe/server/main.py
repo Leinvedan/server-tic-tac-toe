@@ -17,7 +17,7 @@ player_matcher.start()
 while True:
     try:
         connection, client = tcp.accept()
-        logger.info(f'connected to: {str(client)}')
+        logger.info('connected to:' + str(client))
 
         player_connection = ConnectionHandler(
             connection=connection,
@@ -34,4 +34,4 @@ while True:
     except InterruptedError:
         logger.info('New connection interrupted')
     except Exception as e:
-        logger.info(f'Something went wrong:{e}')
+        logger.info('Something went wrong:' + str(e))

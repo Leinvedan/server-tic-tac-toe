@@ -7,14 +7,14 @@ class GameHandler(Thread):
     def __init__(self, connection_1, connection_2, daemon=True):
         Thread.__init__(self, daemon=daemon)
         session_id = id(self)
-        self.logger = create_logger(name=f'GAME-{session_id}', color='BLUE')
+        self.logger = create_logger(name='GAME-' + str(session_id), color='BLUE')
         self.player_1 = connection_1
         self.player_2 = connection_2
 
     def run(self):
         self.logger.info((
-            f'Game starting: {self.player_1.name} '
-            f'VS {self.player_2.name}'
+            'Game starting:' + str(self.player_1.name) +
+            'VS ' + str(self.player_2.name)
         ))
         board = [['', '', ''],
                  ['', '', ''],
@@ -73,7 +73,7 @@ class GameHandler(Thread):
 
             for player in [self.player_1, self.player_2]:
                 if not player.connected:
-                    self.logger.info(f'{player.name} has left the game...')
+                    self.logger.info(str(player.name) + ' has left the game...')
                 player.set_waiting_match(True)
                 player.send_response(ERROR_MESSAGE)
 
@@ -99,6 +99,6 @@ class GameHandler(Thread):
 
     def end_game_logs(self):
         self.logger.info((
-            f'{self.player_1.name} VS {self.player_2.name} game has ended'
+            str(self.player_1.name) + ' VS ' + str(self.player_2.name) + 'game has ended'
         ))
         self.logger.info('Closing session')

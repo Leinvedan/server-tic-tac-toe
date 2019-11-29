@@ -38,7 +38,7 @@ while True:
         print("Waiting match")
 
     elif response['status'] == 'victory' or response['status'] == 'defeat':
-        print(f'[SERVER]:{response["status"]}')
+        print('[SERVER]:' + str(response["status"]))
         print('Do you want to continue?')
         message_to_send, value = read_named_input('continue')
         tcp.sendall(message_to_send)

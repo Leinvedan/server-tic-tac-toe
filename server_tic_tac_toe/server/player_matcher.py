@@ -7,7 +7,7 @@ from server_tic_tac_toe.server.game_handler import GameHandler
 class PlayerMatcher(Thread):
     def __init__(self, daemon=True):
         Thread.__init__(self, daemon=daemon)
-        self.logger = create_logger(name=f'MATCHER', color='GREEN')
+        self.logger = create_logger(name='MATCHER', color='GREEN')
         self.player_list = []
 
     def get_player_list(self):

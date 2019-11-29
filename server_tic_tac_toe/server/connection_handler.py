@@ -25,7 +25,7 @@ class ConnectionHandler(Thread):
             field_to_read='my_name',
             status_to_send='waiting'
         )
-        self.logger = create_logger(name=f'{self.name}', color='YELLOW')
+        self.logger = create_logger(name=str(self.name), color='YELLOW')
         self.is_waiting_match = True
         self.logger.info('new thread running...')
 
@@ -116,7 +116,7 @@ class ConnectionHandler(Thread):
                 message = json.dumps(message)
                 self.connection.sendall(self._encode_data(message))
         except Exception as e:
-            self.logger.info(f'Message could not be sent:\n{e}')
+            self.logger.info('Message could not be sent:\n'+str(e))
             self.close_connection()
 
     def game_ended(self):
@@ -127,10 +127,10 @@ class ConnectionHandler(Thread):
             response = json.loads(message)
             if 'continue' in response:
                 if response['continue'] != 'y':
-                    self.logger.info(f'{self.name} left')
+                    self.logger.info(str(self.name) + ' left')
                     self.close_connection()
                 else:
-                    self.logger.info(f'{self.name} still playing')
+                    self.logger.info(str(self.name) + 'still playing')
         except Exception:
             self.logger.info('Continue couldn`t be processed, ignoring...')
         finally:
